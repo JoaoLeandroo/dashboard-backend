@@ -1,5 +1,6 @@
 import prisma from "../../prisma/prisma";
 import { compare } from "bcryptjs"
+import { sign } from "jsonwebtoken"
 
 interface LoginUserProps {
     email: string;
@@ -22,12 +23,25 @@ class LoginUserService {
                 throw new Error("Usuario ou senha incorretos")
             }
 
+            const token = sign(
+                {
+                    name: user.name,
+                    email: user.email,
+                },
+                process.env.JWT_SECRET,
+                {
+                    subject: user.id,
+                    expiresIn: "30d"
+                }
+            )
 
+            console.log("LOGADO COM SUCESSO!")
             return {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                age: user.age
+                age: user.age,
+                token: token,
             }
         }catch(err) {
             console.log("OPS! ALGO DEU ERRADO.")
